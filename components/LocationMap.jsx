@@ -3,6 +3,7 @@ import GoogleMapReact from "google-map-react";
 import { useEffect, useState } from "react";
 import { SERVER_OPTIONS, TORONTO_CENTER } from "../constants";
 import { BlueMarkerIcon, CurrentLocationMarkerIcon, GreenMarkerIcon, PinkMarkerIcon, PurpleMarkerIcon, RedMarkerIcon } from "./Marker";
+import MapSkeleton from "./MapSkeleton";
 
 let markers = [];
 let infoWindows = [];
@@ -54,6 +55,7 @@ const LocationMap = ({ filters, selectedFilters }) => {
       })
       .catch(function (error) {
         console.error(error);
+        setIsLoading(false); // Stop loading even if there's an error
       });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -100,23 +102,26 @@ const LocationMap = ({ filters, selectedFilters }) => {
     }
   }, [currentLocation, map, maps]);
 
+  // Show skeleton while locations are loading
+  if (isLoading) {
+    return <MapSkeleton />;
+  }
+
   return (
-    <div style={{ height: "100vh", width: "100%" }}>
-      {!isLoading && (
-        <GoogleMapReact
-          bootstrapURLKeys={{
-            key: `${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}`,
-          }}
-          center={currentCenter}
-          defaultZoom={13}
-          yesIWantToUseGoogleMapApiInternals
-          options={{ gestureHandling: "greedy" }}
-          onGoogleApiLoaded={({ map: loadedMap, maps: loadedMaps }) => {
-            setMap(loadedMap);
-            setMaps(loadedMaps);
-          }}
-        />
-      )}
+    <div style={{ height: "100%", width: "100%" }}>
+      <GoogleMapReact
+        bootstrapURLKeys={{
+          key: `${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}`,
+        }}
+        center={currentCenter}
+        defaultZoom={13}
+        yesIWantToUseGoogleMapApiInternals
+        options={{ gestureHandling: "greedy" }}
+        onGoogleApiLoaded={({ map: loadedMap, maps: loadedMaps }) => {
+          setMap(loadedMap);
+          setMaps(loadedMaps);
+        }}
+      />
       <button className="current-location-button" onClick={getCurrentLocation}>
         &#8982;
       </button>

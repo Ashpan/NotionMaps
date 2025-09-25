@@ -8,6 +8,7 @@ import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 import FilterDrawer from "../components/FilterDrawer";
 import LocationMap from "../components/LocationMap";
+import MapSkeleton from "../components/MapSkeleton";
 import { DB_CONFIG_OPTIONS, SERVER_OPTIONS } from "../constants";
 
 function Map() {
@@ -65,18 +66,25 @@ function Map() {
       });
   }, []);
 
+  // Show skeleton while user or filters are loading
+  if (isLoading || Object.keys(filterOptions).length === 0) {
+    return <MapSkeleton />;
+  }
+
   return (
-    !isLoading && (
-      <div className="map-container">
-        <div className="map-overlay">
-          <button className="hamburger-button" onClick={toggleFilterMenu}>
-            <FontAwesomeIcon icon={faBars} /> {/* Hamburger icon */}
+    <div className="map-container">
+      {/* Map overlay with controls */}
+      <div className="map-overlay">
+        {/* Control buttons */}
+        <div className="map-controls">
+          <button className="control-button" onClick={toggleFilterMenu} title="Open Filters">
+            <FontAwesomeIcon icon={faBars} />
           </button>
           <button
-            className="reload-button"
+            className="control-button"
             onClick={() => {
               axios
-                .request(SERVER_OPTIONS)
+                .request(SERVER_OPTIONS())
                 .then(function async(response) {
                   location.reload();
                   console.log(response);
@@ -85,31 +93,40 @@ function Map() {
                   console.error(error);
                 });
             }}
+            title="Refresh Data"
           >
             <FontAwesomeIcon icon={faRefresh} />
           </button>
-          {showFilters && (
-            <div className={`filter-drawer ${showFilters ? "show" : ""}`}>
-              {/* Close button for the filter menu */}
-              <button className="close-button" onClick={toggleFilterMenu}>
-                &times; {/* Unicode "times" symbol (close icon) */}
-              </button>
-
-              {/* FilterDrawer component */}
-              <FilterDrawer
-                filters={filterOptions}
-                selectedFilters={selectedFilters}
-                setSelectedFilters={setSelectedFilters}
-              />
-            </div>
-          )}
         </div>
-        <LocationMap
-          filters={filterOptions}
-          selectedFilters={selectedFilters}
-        />
+
+        {/* Filter overlay backdrop */}
+        {showFilters && (
+          <div
+            className={`filter-overlay ${showFilters ? "show" : ""}`}
+            onClick={toggleFilterMenu}
+          />
+        )}
+
+        {/* Filter drawer */}
+        <div className={`filter-drawer ${showFilters ? "show" : ""}`}>
+          <button className="close-button" onClick={toggleFilterMenu}>
+            &times;
+          </button>
+          <FilterDrawer
+            filters={filterOptions}
+            selectedFilters={selectedFilters}
+            setSelectedFilters={setSelectedFilters}
+          />
+        </div>
+
       </div>
-    )
+
+      {/* Map component */}
+      <LocationMap
+        filters={filterOptions}
+        selectedFilters={selectedFilters}
+      />
+    </div>
   );
 }
 

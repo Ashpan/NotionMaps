@@ -6,6 +6,30 @@
 body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  margin: 0;
+  padding: 0;
+}
+
+/* Full-screen map layout */
+.map-layout {
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  position: fixed;
+  top: 0;
+  left: 0;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* Remove default margins and padding for map pages */
+.map-layout * {
+  box-sizing: border-box;
+}
+
+/* Override Bootstrap's h-100 class for map pages */
+.map-layout .h-100 {
+  height: 100vh !important;
 }
 
 code {
@@ -45,117 +69,470 @@ p code {
 
 
 
-/* :root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
-  --background-end-rgb: 255, 255, 255;
-} */
+/* Clean map interface styles */
 :root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
-  --background-end-rgb: 255, 255, 255;
+  --primary-color: #2563eb;
+  --primary-hover: #1d4ed8;
+  --background-color: #ffffff;
+  --text-primary: #1f2937;
+  --text-secondary: #6b7280;
+  --border-color: #e5e7eb;
+  --shadow-light: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  --shadow-medium: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-large: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
 }
 
-/* @media (prefers-color-scheme: dark) {
-  :root {
-    --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 0, 0, 0;
-    --background-end-rgb: 0, 0, 0;
-  }
-} */
-
-body {
-  color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
-}
-
-.current-location-button {
-  position: absolute;
-  bottom: 100px;
-  right: 11px;
-  background: white;
-  border: 1px solid #ccc;
-  border-radius: 50%;
-  padding: 8px;
-  cursor: pointer;
-  font-size: 18px;
-  line-height: 1;
-  outline: none;
-}
-
+/* Full screen map container */
 .map-container {
   position: relative;
-  width: 100%;
-  height: 95vh;
+  width: 100vw;
+  height: 100vh;
+  background: #f8fafc;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden;
 }
 
-/* .filter-drawer {
-  position: absolute;
-  z-index: 1;
-  pointer-events: auto;
-} */
-
-.filter-drawer {
-  position: absolute;
-  top: 0;
-  right: 0; /* Align the filter menu to the right */
-  width: 300px; /* Adjust the width as needed */
-  background-color: white; /* Set the background color */
-  border-left: 1px solid #ccc; /* Add a border for separation */
-  box-shadow: -2px 0px 4px rgba(0, 0, 0, 0.1); /* Add a subtle shadow */
-  z-index: 3; /* Ensure the filter menu appears above the overlay content */
-  display: flex;
-  flex-direction: column; /* Display checkboxes vertically */
-  padding: 1rem; /* Add some padding for spacing */
-  pointer-events: auto; /* Enable clicks on the filter menu */
-}
-
-/* Close button styles */
-.close-button {
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-size: 1.5rem;
-  color: #333; /* Adjust color as needed */
-  position: absolute;
-  top: 10px;
-  right: 10px;
-}
-
+/* Map overlay for controls */
 .map-overlay {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
+  pointer-events: none;
+  z-index: 10;
+}
+
+/* Control buttons container */
+.map-controls {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  display: flex;
+  gap: 12px;
+  pointer-events: auto;
+}
+
+/* Modern button styling */
+.control-button {
+  background: var(--background-color);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 12px;
+  cursor: pointer;
+  font-size: 16px;
+  color: var(--text-primary);
+  box-shadow: var(--shadow-light);
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+}
+
+.control-button:hover {
+  background: #f9fafb;
+  box-shadow: var(--shadow-medium);
+  border-color: var(--primary-color);
+}
+
+.control-button:active {
+  transform: scale(0.98);
+}
+
+/* Filter drawer styles */
+.filter-drawer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 350px;
+  height: 100vh;
+  max-height: 100vh;
+  background: var(--background-color);
+  border-right: 1px solid var(--border-color);
+  box-shadow: var(--shadow-large);
+  z-index: 50;
+  transform: translateX(-100%);
+  transition: transform 0.3s ease;
+  pointer-events: auto;
   display: flex;
   flex-direction: column;
-  align-items: flex-start; /* Adjust as needed */
-  z-index: 2; /* Ensure overlay content appears above the map */
-  pointer-events: none; /* Enable clicks on the overlay content */
+  overflow: hidden;
 }
 
-.hamburger-button {
+.filter-drawer.show {
+  transform: translateX(0);
+}
+
+.filter-header {
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--border-color);
+  background: #f9fafb;
+}
+
+.filter-header h2 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.filter-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px 24px 40px 24px;
+  /* Add extra bottom padding to ensure content isn't cut off */
+}
+
+/* Custom scrollbar styling */
+.filter-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.filter-content::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+.filter-content::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 3px;
+}
+
+.filter-content::-webkit-scrollbar-thumb:hover {
+  background: var(--primary-color);
+}
+
+.filter-section {
+  margin-bottom: 32px;
+}
+
+.filter-section:last-child {
+  margin-bottom: 0;
+}
+
+.filter-category-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 16px 0;
+  text-transform: capitalize;
+}
+
+.filter-option {
+  display: flex;
+  align-items: center;
+  padding: 8px 0;
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.2s ease;
+}
+
+.filter-option:hover {
+  background: #f9fafb;
+  margin: 8px -12px;
+  padding: 8px 12px;
+  border-radius: 6px;
+}
+
+.filter-option.select-all {
+  font-weight: 600;
+  color: var(--primary-color);
+  border-bottom: 1px solid var(--border-color);
+  margin-bottom: 12px;
+  padding-bottom: 12px;
+}
+
+.filter-option input[type="checkbox"] {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.checkmark {
+  height: 18px;
+  width: 18px;
+  background-color: #fff;
+  border: 2px solid var(--border-color);
+  border-radius: 3px;
+  margin-right: 12px;
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.filter-option:hover .checkmark {
+  border-color: var(--primary-color);
+}
+
+.filter-option input[type="checkbox"]:checked ~ .checkmark {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+.checkmark:after {
+  content: "";
+  position: absolute;
+  display: none;
+  left: 5px;
+  top: 1px;
+  width: 4px;
+  height: 9px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.filter-option input[type="checkbox"]:checked ~ .checkmark:after {
+  display: block;
+}
+
+.option-text {
+  font-size: 14px;
+  color: var(--text-primary);
+  line-height: 1.5;
+}
+
+.filter-option.select-all .option-text {
+  font-weight: 600;
+}
+
+/* Close button */
+.close-button {
+  position: absolute;
+  top: 20px;
+  right: 20px;
   background: none;
   border: none;
   cursor: pointer;
-  font-size: 1.5rem;
-  color: #333; /* Adjust color as needed */
-  padding: 0.5rem;
-  pointer-events: auto; /* Enable clicks on the button */
+  font-size: 24px;
+  color: var(--text-secondary);
+  padding: 4px;
+  line-height: 1;
+  transition: color 0.2s ease;
 }
 
-.reload-button {
-  background: none;
-  border: none;
+.close-button:hover {
+  color: var(--text-primary);
+}
+
+/* Current location button */
+.current-location-button {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  background: var(--background-color);
+  border: 1px solid var(--border-color);
+  border-radius: 50%;
+  padding: 12px;
   cursor: pointer;
-  font-size: 1.5rem;
-  color: #333; /* Adjust color as needed */
-  padding: 0.5rem;
-  pointer-events: auto; /* Enable clicks on the button */
+  font-size: 18px;
+  color: var(--text-primary);
+  box-shadow: var(--shadow-medium);
+  transition: all 0.2s ease;
+  pointer-events: auto;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.current-location-button:hover {
+  background: #f9fafb;
+  box-shadow: var(--shadow-large);
+  border-color: var(--primary-color);
+}
+
+/* Overlay backdrop for mobile */
+.filter-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 40;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+}
+
+.filter-overlay.show {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Skeleton Loading Styles */
+@keyframes skeleton-pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
+}
+
+@keyframes skeleton-bounce {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-10px);
+  }
+  60% {
+    transform: translateY(-5px);
+  }
+}
+
+.map-skeleton {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  overflow: hidden;
+}
+
+.skeleton-controls {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  display: flex;
+  gap: 12px;
+  z-index: 10;
+}
+
+.skeleton-button {
+  width: 44px;
+  height: 44px;
+  background: #e2e8f0;
+  border-radius: 8px;
+  animation: skeleton-pulse 2s ease-in-out infinite;
+}
+
+.skeleton-button:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.skeleton-map {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(45deg, #e2e8f0 25%, transparent 25%),
+              linear-gradient(-45deg, #e2e8f0 25%, transparent 25%),
+              linear-gradient(45deg, transparent 75%, #e2e8f0 75%),
+              linear-gradient(-45deg, transparent 75%, #e2e8f0 75%);
+  background-size: 20px 20px;
+  background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+  opacity: 0.3;
+}
+
+.skeleton-marker {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  background: var(--primary-color);
+  border-radius: 50%;
+  animation: skeleton-pulse 2s ease-in-out infinite;
+}
+
+.skeleton-marker-1 {
+  top: 30%;
+  left: 40%;
+  animation-delay: 0s;
+}
+
+.skeleton-marker-2 {
+  top: 50%;
+  left: 60%;
+  animation-delay: 0.3s;
+}
+
+.skeleton-marker-3 {
+  top: 40%;
+  left: 70%;
+  animation-delay: 0.6s;
+}
+
+.skeleton-marker-4 {
+  top: 60%;
+  left: 30%;
+  animation-delay: 0.9s;
+}
+
+.skeleton-marker-5 {
+  top: 35%;
+  left: 55%;
+  animation-delay: 1.2s;
+}
+
+.skeleton-loading-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  z-index: 10;
+}
+
+.skeleton-text-line {
+  height: 20px;
+  background: #cbd5e1;
+  border-radius: 4px;
+  margin-bottom: 8px;
+  animation: skeleton-pulse 2s ease-in-out infinite;
+  width: 200px;
+}
+
+.skeleton-text-line.short {
+  width: 120px;
+  margin: 0 auto;
+  animation-delay: 0.3s;
+}
+
+.skeleton-location-button {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  width: 48px;
+  height: 48px;
+  background: #e2e8f0;
+  border-radius: 50%;
+  animation: skeleton-pulse 2s ease-in-out infinite;
+  animation-delay: 0.5s;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .filter-drawer {
+    width: 85%;
+    max-width: 350px;
+  }
+
+  .map-controls {
+    top: 10px;
+    left: 10px;
+    gap: 8px;
+  }
+
+  .control-button {
+    padding: 10px;
+    min-width: 40px;
+    min-height: 40px;
+  }
+
+  .current-location-button {
+    bottom: 10px;
+    right: 10px;
+  }
+
+  .skeleton-controls {
+    top: 10px;
+    left: 10px;
+  }
+
+  .skeleton-location-button {
+    bottom: 10px;
+    right: 10px;
+  }
 }
