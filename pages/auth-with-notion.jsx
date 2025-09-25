@@ -20,12 +20,10 @@ const AuthWithNotion = () => {
           Expires: "0",
         },
       });
-      const params = new URLSearchParams([["userId", userId]]);
       axiosInstance
         .request({
           method: "GET",
-          url: `${process.env.NEXT_PUBLIC_ENDPOINT}/user-exists`,
-          params: params,
+          url: `/api/user-exists`,
         })
         .then((response) => {
           console.log(response);

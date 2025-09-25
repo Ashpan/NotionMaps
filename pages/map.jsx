@@ -33,12 +33,10 @@ function Map() {
           Expires: "0",
         },
       });
-      const params = new URLSearchParams([["userId", userId]]);
       axiosInstance
         .request({
           method: "GET",
-          url: `${process.env.NEXT_PUBLIC_ENDPOINT}/user-exists`,
-          params: params,
+          url: `/api/user-exists`,
         })
         .then((response) => {
           console.log(response);
@@ -55,7 +53,7 @@ function Map() {
   useEffect(() => {
     // Fetch filter options from the API endpoint
     axios
-      .request(DB_CONFIG_OPTIONS(user.name))
+      .request(DB_CONFIG_OPTIONS())
       .then((response) => {
         setFilterOptions(response.data);
         setSelectedFilters(
@@ -109,7 +107,6 @@ function Map() {
         <LocationMap
           filters={filterOptions}
           selectedFilters={selectedFilters}
-          userId={user.name}
         />
       </div>
     )

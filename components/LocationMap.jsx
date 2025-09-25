@@ -7,7 +7,7 @@ import { BlueMarkerIcon, CurrentLocationMarkerIcon, GreenMarkerIcon, PinkMarkerI
 let markers = [];
 let infoWindows = [];
 
-const LocationMap = ({ filters, selectedFilters, userId }) => {
+const LocationMap = ({ filters, selectedFilters }) => {
   const [locations, setLocations] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [currentCenter, setCurrentCenter] = useState(TORONTO_CENTER);
@@ -47,7 +47,7 @@ const LocationMap = ({ filters, selectedFilters, userId }) => {
 
   useEffect(() => {
     axiosInstance
-      .request(SERVER_OPTIONS(userId))
+      .request(SERVER_OPTIONS())
       .then(function async(response) {
         setLocations(response.data);
         setIsLoading(false);

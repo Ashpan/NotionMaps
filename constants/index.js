@@ -3,16 +3,16 @@ export const TORONTO_CENTER = {
   lng: -79.389569,
 };
 
-export const SERVER_OPTIONS = (userId) => {
+export const SERVER_OPTIONS = () => {
   return {
     method: "GET",
-    url: `${process.env.NEXT_PUBLIC_ENDPOINT}/locations?userId=${userId}`,
+    url: `/api/locations`,
   };
 };
 
-export const DB_CONFIG_OPTIONS = (userId) => {
+export const DB_CONFIG_OPTIONS = () => {
   return {
     method: "GET",
-    url: `${process.env.NEXT_PUBLIC_ENDPOINT}/filters?userId=${userId}`,
+    url: `/api/filters`,
   };
 };

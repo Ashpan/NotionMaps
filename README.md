@@ -20,38 +20,43 @@ npm install
 
 ## Configuration
 
-### Create an API
+### Environment Setup
 
-For the **External API** page to work, you will need to [create an API](https://auth0.com/docs/authorization/apis) using the [management dashboard](https://manage.auth0.com/#/apis). This will give you an API Identifier that you can use in the `AUTH0_AUDIENCE` environment variable below. Then you will need to [add a permission](https://auth0.com/docs/get-started/dashboard/add-api-permissions) named `read:shows` to your API. To get your app to ask for that permission, include it in the value of the `AUTH0_SCOPE` environment variable.
+1. **Copy the environment template:**
+   ```bash
+   cp .env.example .env.local
+   ```
 
-If you do not wish to use an API or observe the API call working, you should not specify the `AUTH0_AUDIENCE` and `AUTH0_SCOPE` values in the next steps.
+2. **Configure the following services:**
 
-### Configure credentials
+#### Auth0 Setup
+1. Create an Auth0 application at [Auth0 Dashboard](https://manage.auth0.com/)
+2. Set up allowed callback URLs: `http://localhost:3000/api/auth/callback`
+3. Set up allowed logout URLs: `http://localhost:3000`
+4. Copy your Domain, Client ID, and Client Secret to `.env.local`
+5. Generate a secret: `openssl rand -hex 32`
 
-The project needs to be configured with your Auth0 Domain, Client ID and Client Secret for the authentication flow to work.
+#### Notion Integration Setup
+1. Create a Notion integration at [Notion Developers](https://developers.notion.com/)
+2. Copy your OAuth Client ID and Client Secret to `.env.local`
+3. Set up your OAuth redirect URI to match your domain
 
-To do this, first copy `.env.local.example` into a new file in the same folder called `.env.local`, and replace the values with your own Auth0 application credentials (see more info about [loading environmental variables in Next.js](https://nextjs.org/docs/basic-features/environment-variables)):
+#### Google Maps Setup
+1. Create a project in [Google Cloud Console](https://console.cloud.google.com/)
+2. Enable Maps JavaScript API and Places API
+3. Create an API key and add it to `.env.local`
+4. Restrict the key to your domain for security
 
-```sh
-# A long secret value used to encrypt the session cookie
-AUTH0_SECRET='LONG_RANDOM_VALUE'
-# The base url of your application
-AUTH0_BASE_URL='http://localhost:3000'
-# The url of your Auth0 tenant domain
-AUTH0_ISSUER_BASE_URL='https://YOUR_AUTH0_DOMAIN.auth0.com'
-# Your Auth0 application's Client ID
-AUTH0_CLIENT_ID='YOUR_AUTH0_CLIENT_ID'
-# Your Auth0 application's Client Secret
-AUTH0_CLIENT_SECRET='YOUR_AUTH0_CLIENT_SECRET'
-# Your Auth0 API's Identifier 
-# OMIT if you do not want to use the API part of the sample
-AUTH0_AUDIENCE='YOUR_AUTH0_API_IDENTIFIER'
-# The permissions your app is asking for
-# OMIT if you do not want to use the API part of the sample
-AUTH0_SCOPE='openid profile email read:shows'
-```
+#### Supabase Setup
+1. Create a project at [Supabase](https://supabase.com/)
+2. Copy your project URL and anon key to `.env.local`
+3. Set up your database schema (see database section below)
 
-**Note**: Make sure you replace `AUTH0_SECRET` with your own secret (you can generate a suitable string using `openssl rand -hex 32` on the command line).
+### Optional API Configuration
+
+For the **External API** page to work, you will need to [create an API](https://auth0.com/docs/authorization/apis) using the [management dashboard](https://manage.auth0.com/#/apis). This will give you an API Identifier that you can use in the `AUTH0_AUDIENCE` environment variable. Then you will need to [add a permission](https://auth0.com/docs/get-started/dashboard/add-api-permissions) named `read:shows` to your API.
+
+If you do not wish to use an API, you can omit the `AUTH0_AUDIENCE` and `AUTH0_SCOPE` values.
 
 ## Run the sample
 

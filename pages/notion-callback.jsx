@@ -20,13 +20,10 @@ const NotionCallback = () => {
 
       const code = router.query.code;
       if (code) {
-        const params = new URLSearchParams([["userId", userId]]);
-
         axiosInstance
           .request({
             method: "GET",
-            url: `${process.env.NEXT_PUBLIC_ENDPOINT}/user-exists`,
-            params: params,
+            url: `/api/user-exists`,
           })
           .then((response) => {
             console.log(response);
@@ -39,10 +36,9 @@ const NotionCallback = () => {
               axiosInstance
                 .request({
                   method: "POST",
-                  url: `${process.env.NEXT_PUBLIC_ENDPOINT}/token`,
+                  url: `/api/token`,
                   data: {
                     code: code,
-                    userId: userId,
                     databaseId: databaseId,
                   },
                 })
